@@ -1,0 +1,13 @@
+{
+    "name": "viktorf/json-file-parser",
+    "description": "Large json file parser with gzip support",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Viktor Fursenko",
+            "email": "va.fursenko@yandex.ru"
+        }
+    ],
+    "require": {}
+}
