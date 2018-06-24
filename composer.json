@@ -1,5 +1,6 @@
 {
     "name": "viktorf/json-file-parser",
+    "version": "dev-master",
     "description": "Large json file parser with gzip support",
     "type": "library",
     "license": "MIT",
