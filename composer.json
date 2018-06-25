@@ -1,6 +1,6 @@
 {
     "name": "viktorf/json-file-parser",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Large json file parser with gzip support",
     "type": "package",
     "stability":"stable",
@@ -12,10 +12,5 @@
             "email": "va.fursenko@yandex.ru"
         }
     ],
-    "extra": {
-        "branch-alias": {
-            "master": "master"
-        }
-    },
     "require": {}
 }
