@@ -3,11 +3,9 @@
 /**
  * Interface JsonFileParserListener
  *
- * Описание интерфейса
+ * JsonFileParser listener for found objects handling
  *
- * @copyright Online Express, Ltd. (www.online-express.ru)
  * @author Viktor.Fursenko
- * @project oex
  * @version 1.0
  * @date 14.06.2018
  * @time 9:46
@@ -16,7 +14,7 @@
 interface JsonFileParserListener
 {
     /**
-     * Обработчик события нахождения следующего объекта в файле
+     * Next object found event listener
      *
      * @param string $jsonObject
      * @throws Exception
@@ -24,24 +22,24 @@ interface JsonFileParserListener
     public function onObjectFound($jsonObject);
 
     /**
-     * Обработчик начала парсинга файла
+     * Parse beginning event listener
      */
     public function onStart();
 
     /**
-     * Обработчик окончания парсинга файла
+     * Parse ending event listener
      */
     public function onEnd();
 
     /**
-     * Обработчик ошибки. Само исключение будет брошено после выполнения этого метода
+     * Error event listener. The exception will be thrown after that method call
      *
      * @param Exception $e
      */
     public function onError(Exception $e);
 
     /**
-     * Обработчик чтения очередного блока из файла
+     * Next text block read event listener
      *
      * @param string $textChunk
      * @param int $streamPosition
