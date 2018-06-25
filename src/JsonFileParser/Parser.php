@@ -93,8 +93,8 @@ class Parser
     /**
      * Parse method
      *
-     * @param string|resource        $target   Source filename or descriptor
-     * @param Listener $listener Listener object
+     * @param string|resource $target   Source filename or descriptor
+     * @param Listener        $listener Listener object
      */
     public function parse($target, Listener $listener)
     {
