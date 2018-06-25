@@ -2,7 +2,9 @@
     "name": "viktorf/json-file-parser",
     "version": "dev-master",
     "description": "Large json file parser with gzip support",
-    "type": "library",
+    "type": "package",
+    "stability":"stable",
+    "minimum-stability":"stable",
     "license": "MIT",
     "authors": [
         {
