@@ -56,6 +56,27 @@ class JsonFileParser
     protected $listener;
 
     /**
+     * Chunk parsing cursor pointer
+     *
+     * @var int
+     */
+    protected $chunkCursor = 0;
+
+    /**
+     * Nesting braces depth
+     *
+     * @var int
+     */
+    protected $bracesDepth = 0;
+
+    /**
+     * Open quotation mark (string constant) flag
+     *
+     * @var bool
+     */
+    protected $commaFlag = false;
+
+    /**
      * JsonSerialParser constructor.
      *
      * @param int    $bufferSize Read buffer size (in characters)
@@ -80,13 +101,11 @@ class JsonFileParser
         $this->openStream($target);
         // Check it starts from '['
         $this->beginStream();
-        $strPosition = $bracesDepth = 0;
-        $commaFlag = false;
         // Read the file in blocks of $this->bufferSize characters
         // If an empty block is received, the file is done
         while (!$this->isStreamFinished() && $textChunk = $this->readStream()) {
             // Parse the rest part of previous chunk and next one
-            $this->parseChunk($textChunk, $strPosition, $bracesDepth, $commaFlag);
+            $this->parseChunk($textChunk);
         }
         // Check file ending
         $this->finalizeStream();
@@ -97,59 +116,61 @@ class JsonFileParser
     /**
      * Parsing the rest part of previous chunk and next one
      *
-     * @param string $textChunk    New text chunk
-     * @param int   &$strPosition  Current cursor position in it
-     * @param int   &$bracesDepth  Nesting brackets depth
-     * @param bool  &$commaFlag    Opened quotation mark flag
+     * @param string $textChunk New text chunk
      * @throws Exception
      */
-    protected function parseChunk($textChunk, &$strPosition = 0, &$bracesDepth = 0, &$commaFlag = false)
+    protected function parseChunk($textChunk)
     {
         // Concatenate the rest part of previous chunk and next one
         $textChunk = $this->previousChunk . $textChunk;
         $blockLength = strlen($textChunk);
-        if ($blockLength <= $strPosition) {
+        if ($blockLength <= $this->chunkCursor) {
 
             $this->fail("Bad format! Unexpected end of stream or stream is too short: '" . substr($textChunk, 0, 40) . (strlen($textChunk) > 40 ? "'..." : "'"));
         }
         // Object must starts with brace '{'
-        if ($strPosition == 0 && $textChunk{$strPosition} !== '{') {
+        if ($this->chunkCursor == 0 && $textChunk{$this->chunkCursor} !== '{') {
 
             $this->fail("Bad format! Object must starts with brace, but '" . substr($textChunk, 0, 10) . "'... found");
         }
         // Find closing brace '}' for it
         do {
             // Check if current character located in string constants ("Say \" Hello, world! \ "")
-            if ($textChunk{$strPosition} === '"' && ($strPosition == 0 || $textChunk{$strPosition - 1} !== '\\')) {
-                $commaFlag = !$commaFlag;
+            if ($textChunk{$this->chunkCursor} === '"' && ($this->chunkCursor == 0 || $textChunk{$this->chunkCursor - 1} !== '\\')) {
+                $this->commaFlag = !$this->commaFlag;
             }
             // Skip all characters between non-escaped quotation marks
-            if ($commaFlag) {
+            if ($this->commaFlag) {
 
                 continue;
             }
-            if ($textChunk{$strPosition} === '{') {
-                $bracesDepth++;
-            } elseif ($textChunk{$strPosition} === '}') {
-                $bracesDepth--;
+            if ($textChunk{$this->chunkCursor} === '{') {
+                $this->bracesDepth++;
+            } elseif ($textChunk{$this->chunkCursor} === '}') {
+                $this->bracesDepth--;
             }
-        } while (++$strPosition < $blockLength && $bracesDepth > 0);
+            // Braces depth can't be less than zero for valid json
+            if ($this->bracesDepth < 0) {
+
+                $this->fail("Negative braces depth. Json is invalid");
+            }
+        } while (++$this->chunkCursor < $blockLength && $this->bracesDepth > 0);
         // If current object not finished yet, read next one chunk
-        if ($bracesDepth > 0) {
+        if ($this->bracesDepth > 0) {
             $this->previousChunk = $textChunk;
 
             return;
         }
 
         // Handle found object with listener
-        $this->listener->onObjectFound(substr($textChunk, 0, $strPosition));
+        $this->listener->onObjectFound(substr($textChunk, 0, $this->chunkCursor));
 
         // If there is nothing after the found object in the text chunk, read a new one to look for a comma-delimiter and other spaces
         // Because someone can put a comma at the beginning of the next line, and not at the end of the current line
-        if ($strPosition >= $blockLength) {
+        if ($this->chunkCursor >= $blockLength) {
             $textChunk = $this->readStream();
             $blockLength = strlen($textChunk);
-            $strPosition = 0;
+            $this->chunkCursor = 0;
             if (!$textChunk) {
 
                 return;
@@ -157,14 +178,14 @@ class JsonFileParser
         }
         // Save rest part of text chunk, skipping comma-delimiter and other spaces
         // Spaces before delimeter
-        $this->skipSpaces($textChunk, $strPosition);
-        if ($textChunk{$strPosition} === ',') {
-            $strPosition++;
+        $this->skipSpaces($textChunk);
+        if ($textChunk{$this->chunkCursor} === ',') {
+            $this->chunkCursor++;
             // Spaces after delimeter
-            $this->skipSpaces($textChunk, $strPosition);
+            $this->skipSpaces($textChunk);
         }
-        $this->previousChunk = $strPosition < $blockLength
-            ? substr($textChunk, $strPosition, $blockLength - $strPosition)
+        $this->previousChunk = $this->chunkCursor < $blockLength
+            ? substr($textChunk, $this->chunkCursor, $blockLength - $this->chunkCursor)
             : '';
         // If all that is left of the chunk is the closing bracket ']', then the file is done
         // Do not consider the situation when this bracket will go right after the last object in the chunk, 
@@ -174,24 +195,23 @@ class JsonFileParser
             return;
         }
         // Reset the cursor pointer in the text chunk, because it has been changed
-        $strPosition = 0;
-        // Recursively check to see if there is another whole object in the remainder
+        $this->chunkCursor = 0;
+        // Check if there is another whole object in the remainder
         if ($this->previousChunk) {
-            $this->parseChunk('', $strPosition, $bracesDepth, $commaFlag);
+            $this->parseChunk('');
         }
     }
 
     /**
      * Skip all leading spaces in the string
      *
-     * @param string $textChunk   Text chunk
-     * @param int   &$strPosition Cursor pointer
+     * @param string $textChunk Text chunk
      */
-    protected function skipSpaces($textChunk, &$strPosition)
+    protected function skipSpaces($textChunk)
     {
         $strLength = strlen($textChunk);
-        while ($strPosition <= $strLength && ($textChunk{$strPosition} === ' ' || $textChunk{$strPosition} === "\t" || $textChunk{$strPosition} === "\n" || $textChunk{$strPosition} === "\r")) {
-            $strPosition++;
+        while ($this->chunkCursor < $strLength && in_array($textChunk{$this->chunkCursor}, [' ', "\t", "\n", "\r"], true)) {
+            $this->chunkCursor++;
         }
     }
 
