@@ -119,7 +119,7 @@ class Parser
      * Parsing the rest part of previous chunk and next one
      *
      * @param string $textChunk New text chunk
-     * @throws Exception
+     * @throws \Exception
      */
     protected function parseChunk($textChunk)
     {
@@ -231,7 +231,7 @@ class Parser
      * Source file cursor pointer getter
      *
      * @return int
-     * @throws Exception
+     * @throws \Exception
      */
     protected function getStreamPos()
     {
@@ -242,7 +242,7 @@ class Parser
      * Source file opening
      *
      * @param string|resource $stream Filename or opened file description
-     * @throws Exception
+     * @throws \Exception
      */
     protected function openStream($stream)
     {
@@ -289,7 +289,7 @@ class Parser
     /**
      * Stream initialization
      *
-     * @throws Exception
+     * @throws \Exception
      */
     protected function beginStream()
     {
@@ -303,7 +303,7 @@ class Parser
     /**
      * Stream finalization
      *
-     * @throws Exception
+     * @throws \Exception
      */
     protected function finalizeStream()
     {
@@ -317,14 +317,14 @@ class Parser
      * Parse fail with specified message
      *
      * @param string $message Fail message
-     * @throws Exception
+     * @throws \Exception
      */
     protected function fail($message)
     {
         if ($this->file) {
             $message .= '. Stream position: ' . $this->getStreamPos();
         }
-        $exception = new Exception($message);
+        $exception = new \Exception($message);
         try {
             // Handle event with listener
             $this->listener->onError($exception);

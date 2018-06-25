@@ -19,7 +19,7 @@ interface Listener
      * Next object found event listener
      *
      * @param string $jsonObject
-     * @throws Exception
+     * @throws \Exception
      */
     public function onObjectFound($jsonObject);
 
@@ -36,9 +36,9 @@ interface Listener
     /**
      * Error event listener. The exception will be thrown after that method call
      *
-     * @param Exception $e
+     * @param \Exception $e
      */
-    public function onError(Exception $e);
+    public function onError(\Exception $e);
 
     /**
      * Next text block read event listener
