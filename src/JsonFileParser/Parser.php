@@ -1,5 +1,7 @@
 <?php
 
+namespace JsonFileParser;
+
 /**
  * Class JsonFileParser
  *
@@ -11,7 +13,7 @@
  * @time 9:46
  * @link
  */
-class JsonFileParser
+class Parser
 {
     /**
      * Read buffer size (in characters)
@@ -51,7 +53,7 @@ class JsonFileParser
     /**
      * Listener object
      *
-     * @var JsonFileParserListener
+     * @var Listener
      */
     protected $listener;
 
@@ -92,9 +94,9 @@ class JsonFileParser
      * Parse method
      *
      * @param string|resource        $target   Source filename or descriptor
-     * @param JsonFileParserListener $listener Listener object
+     * @param Listener $listener Listener object
      */
-    public function parse($target, JsonFileParserListener $listener)
+    public function parse($target, Listener $listener)
     {
         $this->listener = $listener;
         // Open source file

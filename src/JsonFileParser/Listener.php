@@ -1,5 +1,7 @@
 <?php
 
+namespace JsonFileParser;
+
 /**
  * Interface JsonFileParserListener
  *
@@ -11,7 +13,7 @@
  * @time 9:46
  * @link
  */
-interface JsonFileParserListener
+interface Listener
 {
     /**
      * Next object found event listener
