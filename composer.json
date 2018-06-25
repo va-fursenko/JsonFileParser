@@ -1,6 +1,6 @@
 {
     "name": "viktorf/json-file-parser",
-    "version": "0.1",
+    "version": "1.0.0",
     "description": "Large json file parser with gzip support",
     "type": "package",
     "stability":"stable",
