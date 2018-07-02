@@ -9,4 +9,5 @@ Usage:
 ```
 
 Installation:
-composer require viktorf/json-file-parser
+
+```composer require viktorf/json-file-parser```
