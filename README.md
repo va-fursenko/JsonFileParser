@@ -7,3 +7,6 @@ Usage:
   $parser = new JsonFileParser($bufferSize, null);
   $parser->parse($archiveFilename, $listener);
 ```
+
+Installation:
+composer require viktorf/json-file-parser
